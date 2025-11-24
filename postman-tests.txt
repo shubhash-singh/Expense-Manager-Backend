@@ -1,0 +1,52 @@
+POST /auth/signup
+Headers:
+- Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "demo@example.com",
+  "password": "password123"
+}
+
+POST /auth/login
+Headers:
+- Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "demo@example.com",
+  "password": "password123"
+}
+
+POST /expenses
+Headers:
+- Content-Type: application/json
+Body (raw JSON):
+{
+  "amount": 42.50,
+  "description": "Lunch with team",
+  "date": "2025-01-12",
+  "category": "Food",
+  "userId": "user-123"
+}
+
+GET /expenses
+Query params (optional):
+- category=Food
+- startDate=2025-01-01
+- endDate=2025-01-31
+Body: none
+
+PUT /expenses/{id}
+Headers:
+- Content-Type: application/json
+Body (raw JSON):
+{
+  "amount": 45.00,
+  "description": "Lunch updated",
+  "date": "2025-01-12",
+  "category": "Food",
+  "userId": "user-123"
+}
+
+DELETE /expenses/{id}
+Body: none
+
