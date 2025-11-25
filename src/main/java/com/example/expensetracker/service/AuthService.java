@@ -36,9 +36,10 @@ public class AuthService {
                         existingUser.setUid(UUID.randomUUID().toString());
                         userRepository.save(existingUser);
                     }
-                    return new LoginResponse("Login successful", existingUser.getUid());
+                    String uid = existingUser.getUid();
+                    return new LoginResponse("Login successful", uid, uid);
                 })
-                .orElseGet(() -> new LoginResponse("Invalid email or password", null));
+                .orElseGet(() -> new LoginResponse("Invalid email or password", null, null));
     }
 }
 

@@ -23,17 +23,18 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signUp(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<LoginResponse> signUp(@RequestBody SignUpRequest signUpRequest) {
         // Store the email/password directly in MongoDB
         User user = authService.signUp(signUpRequest);
-        return ResponseEntity.ok(user);
+        LoginResponse response = new LoginResponse("Signup successful", user.getUid(), user.getUid());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         // Return a simple message and UID if the credentials match
         LoginResponse response = authService.login(loginRequest);
-        if (response.getUid() == null) {
+        if (response.getUserId() == null) {
             return ResponseEntity.status(401).body(response);
         }
         return ResponseEntity.ok(response);

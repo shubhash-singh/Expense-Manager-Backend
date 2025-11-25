@@ -1,13 +1,11 @@
 package com.example.expensetracker.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-
 public class ExpenseRequest {
 
     private BigDecimal amount;
     private String description;
-    private LocalDate date;
+    private String date;
     private String category;
     private String userId;
 
@@ -27,11 +25,11 @@ public class ExpenseRequest {
         this.description = description;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

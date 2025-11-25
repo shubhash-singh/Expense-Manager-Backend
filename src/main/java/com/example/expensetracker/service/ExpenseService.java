@@ -3,6 +3,7 @@ package com.example.expensetracker.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 
@@ -25,26 +26,36 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> getExpenses(String category, LocalDate startDate, LocalDate endDate) {
-        // No filters provided, return everything
-        if (category == null && startDate == null && endDate == null) {
-            return expenseRepository.findAll();
+    public List<Expense> getExpenses(String category, String startDate, String endDate) {
+        List<Expense> baseExpenses;
+
+        if (category != null && !category.isEmpty()) {
+            baseExpenses = expenseRepository.findByCategory(category);
+        } else {
+            baseExpenses = expenseRepository.findAll();
         }
 
-        // Handle category only
-        if (category != null && startDate == null && endDate == null) {
-            return expenseRepository.findByCategory(category);
+        LocalDate parsedStart = parseDate(startDate);
+        LocalDate parsedEnd = parseDate(endDate);
+
+        if (parsedStart == null && parsedEnd == null) {
+            return baseExpenses;
         }
 
-        // Handle date range only by filling null bounds with extremes
-        LocalDate safeStart = startDate != null ? startDate : LocalDate.of(1970, 1, 1);
-        LocalDate safeEnd = endDate != null ? endDate : LocalDate.of(3000, 1, 1);
-
-        if (category == null) {
-            return expenseRepository.findByDateBetween(safeStart, safeEnd);
+        List<Expense> filteredExpenses = new ArrayList<>();
+        for (Expense expense : baseExpenses) {
+            LocalDate expenseDate = parseDate(expense.getDate());
+            if (expenseDate == null) {
+                continue;
+            }
+            boolean afterStart = parsedStart == null || !expenseDate.isBefore(parsedStart);
+            boolean beforeEnd = parsedEnd == null || !expenseDate.isAfter(parsedEnd);
+            if (afterStart && beforeEnd) {
+                filteredExpenses.add(expense);
+            }
         }
 
-        return expenseRepository.findByCategoryAndDateBetween(category, safeStart, safeEnd);
+        return filteredExpenses;
     }
 
     public Optional<Expense> updateExpense(String id, ExpenseRequest expenseRequest) {
@@ -54,8 +65,15 @@ public class ExpenseService {
         });
     }
 
-    public void deleteExpense(String id) {
+    public boolean deleteExpense(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Expense id must not be blank");
+        }
+        if (!expenseRepository.existsById(id)) {
+            return false;
+        }
         expenseRepository.deleteById(id);
+        return true;
     }
 
     private void copyRequestToExpense(ExpenseRequest expenseRequest, Expense expense) {
@@ -64,6 +82,16 @@ public class ExpenseService {
         expense.setDate(expenseRequest.getDate());
         expense.setCategory(expenseRequest.getCategory());
         expense.setUserId(expenseRequest.getUserId());
+    }
+    private LocalDate parseDate(String rawDate) {
+        if (rawDate == null || rawDate.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(rawDate);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
 

@@ -1,8 +1,6 @@
 package com.example.expensetracker.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,7 +11,7 @@ public class Expense {
     private String id;
     private BigDecimal amount;
     private String description;
-    private LocalDate date;
+    private String date;
     private String category;
     private String userId;
 
@@ -41,11 +39,11 @@ public class Expense {
         this.description = description;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

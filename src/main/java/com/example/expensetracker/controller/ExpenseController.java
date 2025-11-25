@@ -1,9 +1,7 @@
 package com.example.expensetracker.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,17 +37,15 @@ public class ExpenseController {
     @GetMapping
     public ResponseEntity<List<Expense>> getExpenses(
             @RequestParam(name = "category", required = false) String category,
-            @RequestParam(name = "startDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(name = "endDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate) {
         // Pass any provided filters down to the service
         List<Expense> expenses = expenseService.getExpenses(category, startDate, endDate);
         return ResponseEntity.ok(expenses);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable String id, @RequestBody ExpenseRequest expenseRequest) {
+    public ResponseEntity<Expense> updateExpense(@PathVariable("id") String id, @RequestBody ExpenseRequest expenseRequest) {
         // Try to update the expense, return 404 if the id is unknown
         return expenseService.updateExpense(id, expenseRequest)
                 .map(ResponseEntity::ok)
@@ -57,10 +53,16 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
-        // Delete the expense; MongoRepository handles missing ids gracefully
-        expenseService.deleteExpense(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {
+        try {
+            boolean deleted = expenseService.deleteExpense(id);
+            if (!deleted) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
 
